@@ -1,30 +1,28 @@
 import { Server, Socket } from "socket.io";
-import { SocketUseCase } from "../../application/usecases/socket";
-import INotification from "../../domain/entities/notification/notification";
+import INotification from "../../domain/entities/model/notification.interface";
 import SocketEvent from "../../domain/enum/socketevent";
+import ISocketUseCase from "../../domain/entities/usecase/socketusecase.interface";
+import { ISocketControllerDependencies } from "../../domain/entities/depencies/socketdependencies.interface";
+import ISocketController from "../../domain/entities/controller/socketcontroller.interface";
 
-interface Dependencies {
-  useCase: {
-    SocketUseCase: SocketUseCase;
-  };
-}
 
-export default class SocketController {
+
+export default class SocketController implements ISocketController {
   private _io: Server;
-  private _socketUseCase: SocketUseCase;
+  private _socketUseCase: ISocketUseCase;
   private _userSocketMap: Map<string, string>;
   private _agentSocketMap: Map<string, string>;
   private _adminSocketMap: Map<string, string>;
 
-  constructor(io: Server, dependencies: Dependencies) {
+  constructor(io: Server, dependencies: ISocketControllerDependencies) {
     this._io = io;
-    this._socketUseCase = dependencies.useCase.SocketUseCase;
+    this._socketUseCase = dependencies.SocketUseCase;
     this._userSocketMap = new Map();
     this._agentSocketMap = new Map();
     this._adminSocketMap = new Map();
   }
 
-  onConnection(socket: Socket) {
+  onConnection(socket: Socket):void {
     console.log(`Client connected: ${socket.handshake.query.userId}`);
     const userId = socket.handshake.query.userId as string;
     const role = socket.handshake.query.role as string;
@@ -180,7 +178,7 @@ export default class SocketController {
     }
   }
 
-  emitToAdmins(event: string, data: INotification) {
+  emitToAdmins(event: string, data: INotification):void {
     for (const [_, socketId] of this._adminSocketMap) {
       this._io.to(socketId).emit(event, data);
     }

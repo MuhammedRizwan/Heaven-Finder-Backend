@@ -1,5 +1,5 @@
 import cloudinary from "cloudinary";
-import configKeys from "../../config";
+import configKeys from "../../domain/config/dotenv.config";
 
 cloudinary.v2.config({
   cloud_name: configKeys.CLOUDINARY_CLOUD_NAME,
@@ -7,7 +7,7 @@ cloudinary.v2.config({
   api_secret: configKeys.CLOUDINARY_API_SECRET,
 });
 
-export class CloudinaryService {
+export default class CloudinaryService {
   async uploadImage(file: Express.Multer.File): Promise<string> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.v2.uploader.upload_stream(

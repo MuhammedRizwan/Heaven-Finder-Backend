@@ -1,15 +1,15 @@
 import { NextFunction, Request, Response, Router } from "express";
 import multer from "multer";
-import { OfferController } from "../../../../adapters/controllers/offer.controller";
-import Depencies from "../../../dependancies/depencies";
+import OfferController  from "../../../../adapters/controllers/offer.controller";
 import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
 import { offer_schema } from "../../../../domain/validator/agent-validator";
+import OfferDependencies from "../../../dependancies/offer.dependencies";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const controller = {
-  offer: new OfferController(Depencies),
+  offer: new OfferController(OfferDependencies),
 };
 
 router.get("/:agentId", (req: Request, res: Response, next: NextFunction) =>

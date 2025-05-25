@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { JwtService } from "../../frameworks/services/jwtService";
-import { CustomError } from "../../domain/errors/customError";
+import  JwtService  from "../../frameworks/services/jwtService";
+import CustomError  from "../../domain/errors/customError";
 import HttpStatusCode from "../../domain/enum/httpstatus";
 
 

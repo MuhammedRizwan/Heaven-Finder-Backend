@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { BookingController } from "../../../../adapters/controllers/booking.controller";
-import Depencies from "../../../dependancies/depencies";
 import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
 import { booking_payload } from "../../../../domain/validator/user-validator";
+import BookingDependencies from "../../../dependancies/booking.dependencies";
+import BookingController from "../../../../adapters/controllers/booking.controller";
 
 const router = Router();
 const controller = {
-  booking: new BookingController(Depencies),
+  booking: new BookingController(BookingDependencies),
 };
 router.get("/admin", (req: Request, res: Response, next: NextFunction) =>
   controller.booking.getAdminBookings(req, res, next)

@@ -1,13 +1,14 @@
 import Razorpay from "razorpay";
-import { CustomError } from "../../domain/errors/customError";
+import  CustomError  from "../../domain/errors/customError";
 import crypto from "crypto";
 import HttpStatusCode from "../../domain/enum/httpstatus";
-import configKeys from "../../config";
+import configKeys from "../../domain/config/dotenv.config";
 
 const razorpay = new Razorpay({
   key_id:configKeys.RAZORPAY_KEYID,
   key_secret:configKeys.RAZORPAY_SECRETKEY
 });
+
 const generatedSignature = (
   razorpayOrderId: string,
   razorpayPaymentId: string
@@ -21,7 +22,7 @@ const generatedSignature = (
   return sig;
 };
 
-export class RazorPay {
+export default class RazorPay {
   async createRazorpayOrder(amount: number){
     try {
       const order = await razorpay.orders.create({

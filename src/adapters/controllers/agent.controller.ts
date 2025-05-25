@@ -1,28 +1,22 @@
 import { NextFunction, Request, Response } from "express";
-import { AgentUseCase } from "../../application/usecases/agent";
-import { Iagent } from "../../domain/entities/agent/agent";
-import { AgentVerification } from "../../application/usecases/agent/agentVerifcation";
+import IAgent from "../../domain/entities/model/agent.interface";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import IAgentController from "../../domain/entities/controller/agentcontroller.interface";
+import IAgentUseCase from "../../domain/entities/usecase/agentusecase.interface";
+import { IAgentControllerDependencies } from "../../domain/entities/depencies/agentdependencies.interface";
 
-interface Dependencies {
-  useCase: {
-    AgentUseCase: AgentUseCase;
-    AgentVerification: AgentVerification;
-  };
-}
 
-export class agentController {
-  private _AgentUseCase: AgentUseCase;
-  private _AgentVerification: AgentVerification;
-  
-  constructor(dependencies: Dependencies) {
-    this._AgentUseCase = dependencies.useCase.AgentUseCase;
-    this._AgentVerification = dependencies.useCase.AgentVerification;
+
+export default class AgentController implements IAgentController {
+  private _AgentUseCase: IAgentUseCase;
+
+  constructor(dependencies: IAgentControllerDependencies) {
+    this._AgentUseCase = dependencies.AgentUseCase;
   }
-  async createAgent(req: Request, res: Response, next: NextFunction) {
+  async createAgent(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { agency_name, email, phone, location, password } =
-        req.body as Iagent;
+        req.body as IAgent;
       const agent = await this._AgentUseCase.signupAgent(
         {
           agency_name,
@@ -41,9 +35,9 @@ export class agentController {
       return next(error);
     }
   }
-  async loginAgent(req: Request, res: Response, next: NextFunction) {
+  async loginAgent(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const { email, password } = req.body as Iagent;
+      const { email, password } = req.body as IAgent;
       const { agent, accessToken, refreshToken } =
         await this._AgentUseCase.loginAgent(email, password);
       if (!agent.admin_verified) {
@@ -68,7 +62,7 @@ export class agentController {
     }
   }
 
-  async OTPVerification(req: Request, res: Response, next: NextFunction) {
+  async OTPVerification(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { Otp, agent } = req.body;
       if (!agent) {
@@ -77,7 +71,7 @@ export class agentController {
       if (Otp.length != 4) {
         res.status(HttpStatusCode.NOT_FOUND).json({ message: "Incorrect OTP" });
       }
-      const agentData = await this._AgentVerification.OTPVerification(
+      const agentData = await this._AgentUseCase.OTPVerification(
         Otp,
         agent.email
       );
@@ -91,10 +85,10 @@ export class agentController {
     }
   }
 
-  async sendOTP(req: Request, res: Response, next: NextFunction) {
+  async sendOTP(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { email } = req.body;
-      const OTPData = await this._AgentVerification.sendOTP(email);
+      const OTPData = await this._AgentUseCase.sendOTP(email);
       return res
         .status(HttpStatusCode.OK)
         .json({ success: true, message: "OTP Resend", OTPData });
@@ -103,10 +97,10 @@ export class agentController {
     }
   }
 
-  async changePassword(req: Request, res: Response, next: NextFunction) {
+  async changePassword(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { email, password } = req.body;
-      const agent = await this._AgentVerification.changePassword(
+      const agent = await this._AgentUseCase.changePassword(
         email,
         password
       );
@@ -118,9 +112,9 @@ export class agentController {
     }
   }
 
-  async RefreshAccessToken(req: Request, res: Response) {
+  async RefreshAccessToken(req: Request, res: Response): Promise<Response | void> {
     try {
-      const accessToken = await this._AgentVerification.refreshAccessToken(
+      const accessToken = await this._AgentUseCase.refreshAccessToken(
         req.body.refreshToken
       );
       return res.status(HttpStatusCode.OK).json({ accessToken });
@@ -140,7 +134,7 @@ export class agentController {
       next(error);
     }
   }
-  async updateAgent(req: Request, res: Response, next: NextFunction) {
+  async updateAgent(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { agentId } = req.params;
       const file = req.file as Express.Multer.File;
@@ -156,7 +150,7 @@ export class agentController {
       next(error);
     }
   }
-  async validatePassword(req: Request, res: Response, next: NextFunction) {
+  async validatePassword(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { agentId } = req.params;
       const agent = await this._AgentUseCase.validatePassword(
@@ -170,7 +164,7 @@ export class agentController {
       next(error);
     }
   }
-  async updatePassword(req: Request, res: Response, next: NextFunction) {
+  async updatePassword(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { agentId } = req.params;
       const agent = await this._AgentUseCase.updatePassword(
@@ -184,19 +178,19 @@ export class agentController {
       next(error);
     }
   }
-  async getDashboard(req: Request, res: Response, next: NextFunction) {
+  async getDashboard(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { agentId } = req.params;
       const { packages, booking, bookingRevenue } =
         await this._AgentUseCase.getDashboard(agentId);
       return res
         .status(HttpStatusCode.OK)
-        .json({ success: true, message: "Dashboard Data", packages,booking,bookingRevenue });
+        .json({ success: true, message: "Dashboard Data", packages, booking, bookingRevenue });
     } catch (error) {
       next(error);
     }
   }
-  async getBarChart(req: Request, res: Response, next: NextFunction) {
+  async getBarChart(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { agentId } = req.params;
       const barChartData = await this._AgentUseCase.getBarChart(agentId);

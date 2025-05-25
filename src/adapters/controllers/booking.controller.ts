@@ -1,19 +1,17 @@
 import { NextFunction, Request, Response } from "express";
-import { BookingUseCase } from "../../application/usecases/booking";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import IBookingController from "../../domain/entities/controller/bookingcontroller.interface";
+import IBookingUseCase from "../../domain/entities/usecase/bookingusecase.interface";
+import { IBookingControllerDependencies } from "../../domain/entities/depencies/bookingdependencies.interface";
 
-interface Dependencies {
-  useCase: {
-    BookingUseCase: BookingUseCase;
-  };
-}
+
 const isString = (value: unknown): value is string => typeof value === "string";
-export class BookingController {
-  private _bookingUseCase: BookingUseCase;
-  constructor(dependencies: Dependencies) {
-    this._bookingUseCase = dependencies.useCase.BookingUseCase;
+export default class BookingController implements IBookingController {
+  private _bookingUseCase: IBookingUseCase;
+  constructor(dependencies: IBookingControllerDependencies) {
+    this._bookingUseCase = dependencies.BookingUseCase;
   }
-  async createBooking(req: Request, res: Response, next: NextFunction) {
+  async createBooking(req: Request, res: Response, next: NextFunction):Promise<Response|void>  {
     try {
       const booking = await this._bookingUseCase.createBooking(req.body);
       return res
@@ -23,7 +21,7 @@ export class BookingController {
       next(error);
     }
   }
-  async getBooking(req: Request, res: Response, next: NextFunction) {
+  async getBooking(req: Request, res: Response, next: NextFunction):Promise<Response|void>  {
     try {
       const { bookingId } = req.params;
       const booking = await this._bookingUseCase.getBooking(bookingId);
@@ -34,7 +32,7 @@ export class BookingController {
       next(error);
     }
   }
-  async getAgentBookings(req: Request, res: Response, next: NextFunction) {
+  async getAgentBookings(req: Request, res: Response, next: NextFunction):Promise<Response|void>  {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
@@ -64,7 +62,7 @@ export class BookingController {
       next(error);
     }
   }
-  async getAdminBookings(req: Request, res: Response, next: NextFunction) {
+  async getAdminBookings(req: Request, res: Response, next: NextFunction) :Promise<Response|void> {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
@@ -88,7 +86,7 @@ export class BookingController {
       next(error);
     }
   }
-  async createOrder(req: Request, res: Response, next: NextFunction) {
+  async createOrder(req: Request, res: Response, next: NextFunction):Promise<Response|void>  {
     try {
       const { amount } = req.body;
       const order = await this._bookingUseCase.createRazorpayOrder(amount);
@@ -99,7 +97,7 @@ export class BookingController {
       next(error);
     }
   }
-  async verifyOrder(req: Request, res: Response, next: NextFunction) {
+  async verifyOrder(req: Request, res: Response, next: NextFunction):Promise<Response|void>  {
     try {
       const { orderId, razorpayPaymentId, razorpaySignature } = req.body;
       const successpayment = await this._bookingUseCase.verifyRazorpayOrder(
@@ -114,7 +112,7 @@ export class BookingController {
       next(error);
     }
   }
-  async getTravelHistory(req: Request, res: Response, next: NextFunction) {
+  async getTravelHistory(req: Request, res: Response, next: NextFunction):Promise<Response|void>  {
     try {
       const { userId } = req.params;
       const travelHistory = await this._bookingUseCase.getTravelHistory(userId);
@@ -125,7 +123,7 @@ export class BookingController {
       next(error);
     }
   }
-  async cancelBooking(req: Request, res: Response, next: NextFunction) {
+  async cancelBooking(req: Request, res: Response, next: NextFunction) :Promise<Response|void> {
     try {
       const { bookingId } = req.params;
       const { cancellation_reason } = req.body;
@@ -140,7 +138,7 @@ export class BookingController {
       next(error);
     }
   }
-  async changeStatus(req: Request, res: Response, next: NextFunction) {
+  async changeStatus(req: Request, res: Response, next: NextFunction) :Promise<Response|void> {
     try {
       const { bookingId } = req.params;
       const { status, cancellation_reason } = req.body;
@@ -161,7 +159,7 @@ export class BookingController {
       next(error);
     }
   }
-  async changeTravelStatus(req: Request, res: Response, next: NextFunction) {
+  async changeTravelStatus(req: Request, res: Response, next: NextFunction):Promise<Response|void>  {
     try {
       const { bookingId } = req.params;
       const { travel_status } = req.body;
@@ -180,7 +178,7 @@ export class BookingController {
       next(error);
     }
   }
-  async completedTravel(req: Request, res: Response, next: NextFunction) {
+  async completedTravel(req: Request, res: Response, next: NextFunction):Promise<Response|void>  {
     try {
       const { userId } = req.params;
       const travelHistory = await this._bookingUseCase.getCompletedTravel(
@@ -197,7 +195,7 @@ export class BookingController {
       next(error);
     }
   }
-  async getNewBooking(req: Request, res: Response, next: NextFunction) {
+  async getNewBooking(req: Request, res: Response, next: NextFunction):Promise<Response|void>  {
     try {
       const{agentId} = req.params
       const newBooking = await this._bookingUseCase.getNewBooking(agentId);

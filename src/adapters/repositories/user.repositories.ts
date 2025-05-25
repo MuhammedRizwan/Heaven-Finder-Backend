@@ -1,30 +1,30 @@
 import { FilterQuery, ObjectId } from "mongoose";
-import { Iuser } from "../../domain/entities/user/user";
-import { CustomError } from "../../domain/errors/customError";
+import IUser  from "../../domain/entities/model/user.interface";
+import CustomError from "../../domain/errors/customError";
 import userModel from "../database/models/user.model";
 import HttpStatusCode from "../../domain/enum/httpstatus";
 
-export class UserRepository {
-  async createUser(user: Iuser): Promise<Iuser> {
+export default class UserRepository {
+  async createUser(user: IUser): Promise<IUser> {
     const userCreate = await userModel.create(user);
-    const userData: Iuser = {
-      ...(userCreate.toObject() as unknown as Iuser),
+    const userData: IUser = {
+      ...(userCreate.toObject() as unknown as IUser),
       _id: userCreate._id.toString(),
     };
     return userData;
   }
-  async findUserByEmail(email: string): Promise<Iuser | null> {
+  async findUserByEmail(email: string): Promise<IUser | null> {
     const user = await userModel.findOne({ email });
     if (!user) {
       return user;
     }
-    const userData: Iuser = {
-      ...(user.toObject() as unknown as Iuser),
+    const userData: IUser = {
+      ...(user.toObject() as unknown as IUser),
       _id: user._id.toString(),
     };
     return userData;
   }
-  async verifyuser(email: string): Promise<Iuser | null> {
+  async verifyuser(email: string): Promise<IUser | null> {
     const updatedUser = await userModel.findOneAndUpdate(
       { email },
       { $set: { is_verified: true } },
@@ -33,8 +33,8 @@ export class UserRepository {
     if (!updatedUser) {
       return null;
     }
-    const userData: Iuser = {
-      ...(updatedUser.toObject() as unknown as Iuser),
+    const userData: IUser = {
+      ...(updatedUser.toObject() as unknown as IUser),
       _id: updatedUser._id.toString(),
     };
     return userData;
@@ -48,19 +48,19 @@ export class UserRepository {
     if (!updatedUser) {
       return null;
     }
-    const userData: Iuser = {
-      ...(updatedUser.toObject() as unknown as Iuser),
+    const userData: IUser = {
+      ...(updatedUser.toObject() as unknown as IUser),
       _id: updatedUser._id.toString(),
     };
 
     return userData;
   }
   async getAllUsersData(
-    query: FilterQuery<Iuser>,
+    query: FilterQuery<IUser>,
     page: number,
     limit: number,
     filterData: object
-  ): Promise<Iuser[] | null> {
+  ): Promise<IUser[] | null> {
     const completeQuery = { ...query, ...filterData };
     const users = await userModel
       .find(completeQuery)
@@ -68,8 +68,8 @@ export class UserRepository {
       .limit(limit)
       .sort({ createdAt: -1 });
     return users.map((user) => {
-      const userData: Iuser = {
-        ...(user.toObject() as unknown as Iuser),
+      const userData: IUser = {
+        ...(user.toObject() as unknown as IUser),
         _id: user._id.toString(),
       };
       return userData;
@@ -78,17 +78,17 @@ export class UserRepository {
   async changeUserStatus(
     id: ObjectId,
     is_block: boolean
-  ): Promise<Iuser | null> {
-    const updatedUser: Iuser | null = await userModel.findOneAndUpdate(
+  ): Promise<IUser | null> {
+    const updatedUser: IUser | null = await userModel.findOneAndUpdate(
       { _id: id },
       { $set: { is_block } },
       { new: true }
     );
     return updatedUser;
   }
-  async getUser(id: string): Promise<Iuser | null> {
+  async getUser(id: string): Promise<IUser | null> {
     try {
-      const user: Iuser | null = await userModel.findById(id);
+      const user: IUser | null = await userModel.findById(id);
       if (!user) {
         throw new CustomError("user not found", HttpStatusCode.NOT_FOUND);
       }
@@ -99,7 +99,7 @@ export class UserRepository {
   }
   async updateRefreshToken(id: string, refreshToken: string): Promise<void> {
     try {
-      const updatedUser: Iuser | null = await userModel.findOneAndUpdate(
+      const updatedUser: IUser | null = await userModel.findOneAndUpdate(
         { _id: id },
         { $set: { refreshToken } },
         { new: true }
@@ -109,15 +109,15 @@ export class UserRepository {
     }
   }
   async countUsers(
-    query: FilterQuery<Iuser>,
+    query: FilterQuery<IUser>,
     filterData: object
   ): Promise<number> {
     const completedQuery = { ...query, ...filterData };
     return await userModel.countDocuments(completedQuery);
   }
-  async updateProfile(id: string, userData: Iuser): Promise<Iuser | null> {
+  async updateProfile(id: string, userData: IUser): Promise<IUser | null> {
     try {
-      const user: Iuser | null = await userModel.findOneAndUpdate(
+      const user: IUser | null = await userModel.findOneAndUpdate(
         { _id: id },
         { $set: userData },
         { new: true }
@@ -130,9 +130,9 @@ export class UserRepository {
       throw error;
     }
   }
-  async updatePassword(id: string, password: string): Promise<Iuser | null> {
+  async updatePassword(id: string, password: string): Promise<IUser | null> {
     try {
-      const user: Iuser | null = await userModel.findOneAndUpdate(
+      const user: IUser | null = await userModel.findOneAndUpdate(
         { _id: id },
         { $set: { password } },
         { new: true }
@@ -146,16 +146,16 @@ export class UserRepository {
     }
   }
   async getContacts(
-    query: FilterQuery<Iuser>,
+    query: FilterQuery<IUser>,
     userId: string | undefined
-  ): Promise<Iuser[] | null> {
+  ): Promise<IUser[] | null> {
     try {
       const completedQuery = {
         ...query,
         is_block: false,
         _id: { $ne: userId },
       };
-      const users: Iuser[] | null = await userModel.find(completedQuery, {
+      const users: IUser[] | null = await userModel.find(completedQuery, {
         _id: 1,
         username: 1,
         email: 1,

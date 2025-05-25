@@ -1,19 +1,17 @@
 import { NextFunction, Request, Response } from "express";
-import { PostUseCase } from "../../application/usecases/post/post.usecase";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import IPostController from "../../domain/entities/controller/postcontroller.interface";
+import IPostUseCase from "../../domain/entities/usecase/postusecase.interface";
+import { IPostControllerDependencies } from "../../domain/entities/depencies/postdependencies.interface";
 
-interface Dependencies {
-  useCase: {
-    PostUseCase: PostUseCase;
-  };
-}
 
-export class PostController {
-  private _postUseCase: PostUseCase;
-  constructor(dependencies: Dependencies) {
-    this._postUseCase = dependencies.useCase.PostUseCase;
+
+export default class PostController implements IPostController {
+  private _postUseCase: IPostUseCase;
+  constructor(dependencies: IPostControllerDependencies) {
+    this._postUseCase = dependencies.PostUseCase;
   }
-  async getAllPost(req:Request,res:Response,next:NextFunction){
+  async getAllPost(req:Request,res:Response,next:NextFunction): Promise<Response | void>{
     try {
         const post=await this._postUseCase.getAllPost()
         return res.status(HttpStatusCode.OK).json({success:true,message:"fetched all data",post})
@@ -22,7 +20,7 @@ export class PostController {
     }
   }
   
-  async createPost(req: Request, res: Response, next: NextFunction) {
+  async createPost(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const post = this._postUseCase.createPost(req.body, req.files);
       return res
@@ -32,7 +30,7 @@ export class PostController {
       next(error);
     }
   }
-  async editPost(req: Request, res: Response, next: NextFunction) {
+  async editPost(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { postId } = req.params;
       const post = await this._postUseCase.editPost(postId, req.body, req.files);
@@ -43,7 +41,7 @@ export class PostController {
       next(error);
     }
   }
-  async userPost(req: Request, res: Response, next: NextFunction) {
+  async userPost(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { userId } = req.params;
       const post = await this._postUseCase.userPost(userId);
@@ -54,7 +52,7 @@ export class PostController {
       next(error);
     }
   }
-  async getPost(req:Request,res:Response,next:NextFunction){
+  async getPost(req:Request,res:Response,next:NextFunction): Promise<Response | void>{
     try {
         const {postId}=req.params
         const post=await this._postUseCase.getPost(postId)
@@ -63,7 +61,7 @@ export class PostController {
         next(error)
     }
   }
-  async addLike(req: Request, res: Response, next: NextFunction) {
+  async addLike(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { postId} = req.params;
       const { userId } = req.body;
@@ -75,7 +73,7 @@ export class PostController {
       next(error)
     }
   }
-  async removeLike(req: Request, res: Response, next: NextFunction) {
+  async removeLike(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { postId} = req.params;
       const { userId } = req.body;
@@ -87,7 +85,7 @@ export class PostController {
       next(error)
     }
   }
-  async addComment(req: Request, res: Response, next: NextFunction) {
+  async addComment(req: Request, res: Response, next: NextFunction) : Promise<Response | void>{
     try {
       const { postId } = req.params;
       const { userId,commentText } = req.body;
@@ -99,7 +97,7 @@ export class PostController {
       next(error)
     }
   }
-  async removeComment(req: Request, res: Response, next: NextFunction) {
+  async removeComment(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { postId, commentId } = req.params;
       const post = await this._postUseCase.removeComment(

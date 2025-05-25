@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { CustomError } from "../../domain/errors/customError";
+import CustomError  from "../../domain/errors/customError";
 import HttpStatusCode from "../../domain/enum/httpstatus";
 
 export const errorHandler = (

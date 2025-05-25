@@ -1,13 +1,11 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { ChatmessageController } from "../../../../adapters/controllers/chatmessage.controller";
-import Depencies from "../../../dependancies/depencies";
-
+import ChatmessageController from "../../../../adapters/controllers/chatmessage.controller";
+import ChatmessageDependencies from "../../../dependancies/chatmessage.dependencies";
 
 const router = Router();
 
-
 const controller = {
-  chatMessage: new ChatmessageController(Depencies),
+  chatMessage: new ChatmessageController(ChatmessageDependencies),
 };
 router.get("/contacts/:userId", (req: Request, res: Response, next: NextFunction) =>
   controller.chatMessage.getContacts(req, res, next)

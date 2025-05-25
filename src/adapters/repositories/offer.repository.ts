@@ -1,16 +1,16 @@
-import Offer from "../../domain/entities/offer/offer";
+import IOffer from "../../domain/entities/model/offer.interface";
 import HttpStatusCode from "../../domain/enum/httpstatus";
-import { CustomError } from "../../domain/errors/customError";
+import CustomError  from "../../domain/errors/customError";
 import offerModel from "../database/models/offer.model";
 
-export class OfferRepository {
+export default class OfferRepository {
   async getAllOffers(
     agentId: string,
     query: object,
     page: number,
     limit: number,
     filterData: object
-  ): Promise<Offer[]> {
+  ): Promise<IOffer[]> {
     try {
       const completedQuery = { agent_id: agentId, ...query, ...filterData };
       const offers = await offerModel
@@ -19,16 +19,16 @@ export class OfferRepository {
         .limit(limit)
         .sort({ createdAt: -1 });
       if (!offers) throw new CustomError("Offers not found", HttpStatusCode.NOT_FOUND);
-      return offers as unknown as Offer[];
+      return offers as unknown as IOffer[];
     } catch (error) {
       throw error;
     }
   }
-  async createOffer(offer: Offer): Promise<Offer> {
+  async createOffer(offer: IOffer): Promise<IOffer> {
     try {
       const createOffer = await offerModel.create(offer);
       if (!createOffer) throw new CustomError("Offer not created", HttpStatusCode.INTERNAL_SERVER_ERROR);
-      return createOffer as unknown as Offer;
+      return createOffer as unknown as IOffer;
     } catch (error) {
       throw error;
     }
@@ -42,16 +42,16 @@ export class OfferRepository {
       throw error;
     }
   }
-  async getOffer(offerId: string): Promise<Offer> {
+  async getOffer(offerId: string): Promise<IOffer> {
     try {
       const offer = await offerModel.findOne({_id:offerId}).populate('package_id');
       if (!offer) throw new CustomError("Offer not found", HttpStatusCode.NOT_FOUND);
-      return offer as unknown as Offer;
+      return offer as unknown as IOffer;
     } catch (error) {
       throw error;
     }
   }
-  async updateOffer(offerId: string, offer: Offer): Promise<Offer> {
+  async updateOffer(offerId: string, offer: IOffer): Promise<IOffer> {
     try {
       const updatedOffer = await offerModel.findByIdAndUpdate(offerId, offer, {
         new: true,
@@ -61,7 +61,7 @@ export class OfferRepository {
         throw new CustomError("Offer not found", HttpStatusCode.NOT_FOUND);
       }
 
-      return updatedOffer as unknown as Offer;
+      return updatedOffer as unknown as IOffer;
     } catch (error) {
       throw error;
     }
@@ -69,7 +69,7 @@ export class OfferRepository {
   async blockNUnblockOffer(
     offerId: string,
     is_active: boolean
-  ): Promise<Offer> {
+  ): Promise<IOffer> {
     try {
       const updatedOffer = await offerModel.findOneAndUpdate(
         { _id: offerId },
@@ -81,28 +81,28 @@ export class OfferRepository {
         throw new CustomError("Offer not found", HttpStatusCode.NOT_FOUND);
       }
 
-      return updatedOffer as unknown as Offer;
+      return updatedOffer as unknown as IOffer;
     } catch (error) {
       throw error;
     }
   }
-  async getAllOffersToday(today:Date):Promise<Offer[]>{
+  async getAllOffersToday(today:Date):Promise<IOffer[]>{
     try {
       const validOffers = await offerModel.find({
         valid_from: { $lte: today},  
       }).populate('package_id');
-      return validOffers as unknown as Offer[];
+      return validOffers as unknown as IOffer[];
     } catch (error) {
       console.error("Error fetching expiring offers:", error);
       throw error;
     }
   }
-  async getAllOffersExpired(today:Date):Promise<Offer[]>{
+  async getAllOffersExpired(today:Date):Promise<IOffer[]>{
     try {
       const expiringOffers = await offerModel.find({
         valid_upto: { $lte: today},  
       }).populate('package_id');
-      return expiringOffers as unknown as Offer[];
+      return expiringOffers as unknown as IOffer[];
     } catch (error) {
       console.error("Error fetching expiring offers:", error);
       throw error;

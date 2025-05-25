@@ -1,7 +1,7 @@
-import Post from "../../domain/entities/post/post";
+import Post from "../../domain/entities/model/post.interface";
 import postModel from "../database/models/post.model";
 
-export class PostRepository {
+export default class PostRepository {
   async getAllPost(): Promise<Post[]> {
     try {
       const postData = await postModel

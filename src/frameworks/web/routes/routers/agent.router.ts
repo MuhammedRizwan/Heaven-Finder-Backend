@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { agentController } from "../../../../adapters/controllers/agent.controller";
 import packageRouter from "./package.router";
 import categoryRouter from "./category.router";
 import bookingRouter from "./booking.router";
@@ -9,7 +8,6 @@ import notificationRouter from "./notification.router";
 import multer from "multer";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
 import { agentBlocked } from "../../../../adapters/middleware/block.middleware";
-import Depencies from "../../../dependancies/depencies";
 import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
 import {
   agent_login,
@@ -19,12 +17,14 @@ import {
   agent_profile,
   agent_signup,
 } from "../../../../domain/validator/agent-validator";
+import AgentDependencies from "../../../dependancies/agent.dependencies";
+import AgentController from "../../../../adapters/controllers/agent.controller";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const controller = {
-  agent: new agentController(Depencies),
+  agent: new AgentController(AgentDependencies),
 };
 
 router.post(

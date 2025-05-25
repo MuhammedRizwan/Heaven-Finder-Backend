@@ -1,12 +1,12 @@
 import {Request,Response,Router,NextFunction} from "express"
-import { ReviewController } from "../../../../adapters/controllers/review.controller";
-import Depencies from "../../../dependancies/depencies";
+import ReviewController  from "../../../../adapters/controllers/review.controller";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
+import ReviewDependencies from "../../../dependancies/review.dependencies";
 
 
 const router = Router();    
 const controller = {
-    review: new ReviewController(Depencies)
+    review: new ReviewController(ReviewDependencies)
 }
 router.get("/:packageId",(req:Request,res:Response,next:NextFunction)=>{
     controller.review.getReviews(req,res,next)

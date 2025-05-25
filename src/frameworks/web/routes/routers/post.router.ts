@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response, Router } from "express";
 import multer from "multer";
-import { PostController } from "../../../../adapters/controllers/post.controller";
-import Depencies from "../../../dependancies/depencies";
+import PostController  from "../../../../adapters/controllers/post.controller";
+import PostDependencies from "../../../dependancies/post.dependencies";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const controller = {
-  post: new PostController(Depencies),
+  post: new PostController(PostDependencies),
 };
 router.get("/get-all-post", (req: Request, res: Response, next: NextFunction) =>
   controller.post.getAllPost(req, res, next)

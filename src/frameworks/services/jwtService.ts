@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import configKeys from '../../config';
+import configKeys from '../../domain/config/dotenv.config';
 
 
 const JWT_SECRET = configKeys.JWT_SECRET;
@@ -7,7 +7,7 @@ const REFRESH_TOKEN_SECRET = configKeys.REFRESH_TOKEN_SECRET;
 const ACCESS_TOKEN_EXPIRES_IN = '10m'; 
 const REFRESH_TOKEN_EXPIRES_IN = '14day';
 
-export class JwtService {
+export default class JwtService {
 
   generateAccessToken(userId: string) {
     return jwt.sign({ userId }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN });

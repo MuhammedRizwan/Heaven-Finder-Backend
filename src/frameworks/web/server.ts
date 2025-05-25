@@ -1,5 +1,5 @@
 import { Server } from 'http'
-import configKeys from '../../config'
+import configKeys from '../../domain/config/dotenv.config'
 import "../cron/sheduleTask"
 
 const serverConfig = (server: Server) => {

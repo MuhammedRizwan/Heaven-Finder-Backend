@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs"
 
-export class PasswordService{
+export default class PasswordService{
     async passwordHash(password:string):Promise<string>{
         const HashedPssword=await bcrypt.hash(password,10)
         return HashedPssword

@@ -1,21 +1,17 @@
 import { NextFunction, Request, Response } from "express";
-import { ReviewUseCase } from "../../application/usecases/review";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import IReviewUseCase from "../../domain/entities/usecase/reviewusecase.interface";
+import { IReviewControllerDependencies } from "../../domain/entities/depencies/reviewdependencies.interface";
 
-interface Dependencies {
-  useCase: {
-    ReviewUseCase: ReviewUseCase;
-  };
-}
 
-export class ReviewController {
-  private _reviewUseCase: ReviewUseCase;
+export default class ReviewController {
+  private _reviewUseCase: IReviewUseCase;
 
-  constructor(dependencies: Dependencies) {
-    this._reviewUseCase = dependencies.useCase.ReviewUseCase;
+  constructor(dependencies: IReviewControllerDependencies) {
+    this._reviewUseCase = dependencies.ReviewUseCase;
   }
 
-  async createReview(req: Request, res: Response, next: NextFunction) {
+  async createReview(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { bookingId } = req.params;
       const booking = await this._reviewUseCase.createReview(bookingId,req.body);
@@ -30,7 +26,7 @@ export class ReviewController {
       next(error);
     }
   }
-  async editReview(req: Request, res: Response, next: NextFunction) {
+  async editReview(req: Request, res: Response, next: NextFunction) : Promise<Response | void>{
     try {
       const { reviewId } = req.params;
       const review = await this._reviewUseCase.editReview(reviewId,req.body);
@@ -41,7 +37,7 @@ export class ReviewController {
       next(error);
     }
   }
-  async deleteReview(req: Request, res: Response, next: NextFunction) {
+  async deleteReview(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { bookingId, reviewId } = req.params;
       const booking = await this._reviewUseCase.deleteReview(bookingId,reviewId);
@@ -52,7 +48,7 @@ export class ReviewController {
       next(error);
     }
   }
-  async getReviews(req: Request, res: Response, next: NextFunction) {
+  async getReviews(req: Request, res: Response, next: NextFunction) : Promise<Response | void>{
     try {
       const { packageId } = req.params;
       const review = await this._reviewUseCase.getReviews(packageId);

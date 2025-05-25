@@ -1,20 +1,17 @@
 import { NextFunction, Request, Response } from "express";
-import { ChatmessageUseCase } from "../../application/usecases/chatmessage";
 import { isString } from "./admin.controller";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import IChatmessageController from "../../domain/entities/controller/chatmessagecontroller.interface";
+import IChatmessageUseCase from "../../domain/entities/usecase/chatmessageusecase.interface";
+import { IChatmessageControllerDependencies } from "../../domain/entities/depencies/chatmessagedependencies.interface";
 
-interface Dependencies {
-  useCase: {
-    ChatmessageUseCase: ChatmessageUseCase;
-  };
-}
 
-export class ChatmessageController {
-  private _chatmessageUseCase: ChatmessageUseCase;
-  constructor(dependencies: Dependencies) {
-    this._chatmessageUseCase = dependencies.useCase.ChatmessageUseCase;
+export default class ChatmessageController implements IChatmessageController{
+  private _chatmessageUseCase: IChatmessageUseCase;
+  constructor(dependencies: IChatmessageControllerDependencies) {
+    this._chatmessageUseCase = dependencies.ChatmessageUseCase;
   }
-  async getContacts(req: Request, res: Response, next: NextFunction) {
+  async getContacts(req: Request, res: Response, next: NextFunction):Promise<Response|void> {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const {userId} = req.params
@@ -26,7 +23,7 @@ export class ChatmessageController {
       next(error);
     }
   }
-  async getChats(req: Request, res: Response, next: NextFunction) {
+  async getChats(req: Request, res: Response, next: NextFunction) :Promise<Response|void>{
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const {userId} = req.params
@@ -38,7 +35,7 @@ export class ChatmessageController {
       next(error);
     }
   }
-  async getRoom(req: Request, res: Response, next: NextFunction) {
+  async getRoom(req: Request, res: Response, next: NextFunction):Promise<Response|void> {
     try {
         const {recieverId, senderId} = req.params
         const room = await this._chatmessageUseCase.getRoom(recieverId, senderId);
@@ -47,13 +44,13 @@ export class ChatmessageController {
       next(error);
     }
   }
-  async getRoomMessage(req:Request,res:Response,next:NextFunction){
+  async getRoomMessage(req:Request,res:Response,next:NextFunction):Promise<Response|void>{
     try {
         const {roomId,userId}=req.params
         const room = await this._chatmessageUseCase.getRoomMessage(roomId,userId);
         return res.status(HttpStatusCode.OK).json({success:true,message:"Reciever Fetched",room})
     } catch (error) {
-        throw error
+        next(error)
     }
   }
 }

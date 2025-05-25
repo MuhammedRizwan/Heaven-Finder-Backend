@@ -1,18 +1,15 @@
 import { NextFunction, Request, Response } from "express";
-import { WalletUseCase } from "../../application/usecases/wallet";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import IWalletUseCase from "../../domain/entities/usecase/walletusecase.interface";
+import { IwalletControllerDependencies } from "../../domain/entities/depencies/walletdependencies.interface";
+import IWalletController from "../../domain/entities/controller/walletcontroller.interface";
 
-interface Dependencies {
-  useCase: {
-    WalletUseCase: WalletUseCase;
-  };
-}
-export class walletController {
-  private _walletUseCase: WalletUseCase;
-  constructor(dependencies: Dependencies) {
-    this._walletUseCase = dependencies.useCase.WalletUseCase;
+export default class walletController implements IWalletController{
+  private _walletUseCase: IWalletUseCase;
+  constructor(dependencies: IwalletControllerDependencies) {
+    this._walletUseCase = dependencies.WalletUseCase;
   }
-  async getAllWallet(req: Request, res: Response, next: NextFunction) {
+  async getAllWallet(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { userId } = req.params;
       const wallet = await this._walletUseCase.getAllWallet(userId);
@@ -25,11 +22,11 @@ export class walletController {
       next(error);
     }
   }
-  async checkBalance(req: Request, res: Response, next: NextFunction) {
+  async checkBalance(req: Request, res: Response, next: NextFunction) :Promise<Response|void>{
     try {
-      const { userId,amount } = req.body;
-      console.log(userId,amount)
-      const wallet = await this._walletUseCase.checkBalance(userId,amount);
+      const { userId, amount } = req.body;
+      console.log(userId, amount)
+      const wallet = await this._walletUseCase.checkBalance(userId, amount);
       return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "Fetched All Wallet",

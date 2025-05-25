@@ -1,6 +1,6 @@
 import walletModel from "../database/models/wallet.model";
-import Wallet from "../../domain/entities/wallet/wallet";
-import { CustomError } from "../../domain/errors/customError";
+import Wallet from "../../domain/entities/model/wallet.interface";
+import CustomError from "../../domain/errors/customError";
 import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Transaction {
@@ -9,7 +9,7 @@ interface Transaction {
   transactionType: "credit" | "debit";
   reason: string;
 }
-export class WalletRepository {
+export default class WalletRepository {
   async createWallet(userId: string): Promise<void> {
     const newWallet = await walletModel.create({ wallet_user: userId });
   }

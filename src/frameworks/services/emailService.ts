@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
-import configKeys from '../../config';
+import configKeys from '../../domain/config/dotenv.config';
 
-export class EmailService {
+export default class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {

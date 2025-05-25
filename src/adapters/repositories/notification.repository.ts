@@ -1,7 +1,7 @@
-import INotification from "../../domain/entities/notification/notification";
+import INotification from "../../domain/entities/model/notification.interface";
 import NotificationModel from "../database/models/notification.model";
 
-export class NotificationRepository {
+export default class NotificationRepository {
   async saveNotification(data: INotification): Promise<INotification | null> {
     try {
       const savedNotification = await NotificationModel.create(data);

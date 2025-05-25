@@ -1,19 +1,19 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { adminController } from "../../../../adapters/controllers/admin.controller";
 import categoryRouter from "./category.router";
 import bookingRouter from "./booking.router";
 import couponRouter from "./coupon.router";
 import walletRouter from "./wallet.router";
 import notificationRouter from "./notification.router";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
-import Depencies from "../../../dependancies/depencies";
 import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
 import { admin_login } from "../../../../domain/validator/admin-validator";
+import AdminDependencies from "../../../dependancies/admin.dependencies";
+import adminController from "../../../../adapters/controllers/admin.controller";
 
 const router = Router();
 
 const controller = {
-  admin: new adminController(Depencies),
+  admin: new adminController(AdminDependencies),
 };
 
 router.post("/login",validateSchema(admin_login) ,(req: Request, res: Response, next: NextFunction) =>

@@ -1,19 +1,17 @@
 import { NextFunction, Request, Response } from "express";
-import NotificationUseCase from "../../application/usecases/notification";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import { INotificationControllerDependencies } from "../../domain/entities/depencies/notificationdependencies.interface";
+import INotificationUseCase from "../../domain/entities/usecase/notificationusecase.interface";
 
-interface Depencies {
-  useCase: {
-    NotificationUseCase: NotificationUseCase;
-  };
-}
+
+
 
 export default class NotificationController {
-  private _NotificationUseCase: NotificationUseCase;
-  constructor(dependencies: Depencies) {
-    this._NotificationUseCase = dependencies.useCase.NotificationUseCase;
+  private _NotificationUseCase: INotificationUseCase;
+  constructor(dependencies: INotificationControllerDependencies) {
+    this._NotificationUseCase = dependencies.NotificationUseCase;
   }
-  async getAgentNotifications(req: Request, res: Response, next: NextFunction) {
+  async getAgentNotifications(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { agentId } = req.params;
       const notifications = await this._NotificationUseCase.getAgentNotifications(
@@ -26,7 +24,7 @@ export default class NotificationController {
       next(error);
     }
   }
-  async getUserNotifications(req: Request, res: Response, next: NextFunction) {
+  async getUserNotifications(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { userId } = req.params;
       const notifications = await this._NotificationUseCase.getAgentNotifications(
@@ -39,7 +37,7 @@ export default class NotificationController {
       next(error);
     }
   }
-  async getAdminNotifications(req: Request, res: Response, next: NextFunction) {
+  async getAdminNotifications(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { adminId } = req.params;
       const notifications = await this._NotificationUseCase.getAdminNotifications(

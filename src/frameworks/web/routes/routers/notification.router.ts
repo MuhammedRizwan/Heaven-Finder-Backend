@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response, Router } from "express";
-import Depencies from "../../../dependancies/depencies";
 import NotificationController from "../../../../adapters/controllers/notification.controller";
+import NotificationDependencies from "../../../dependancies/notification.dependencies";
 
 const router = Router();
 
 const controller = {
-  notification: new NotificationController(Depencies),
+  notification: new NotificationController(NotificationDependencies),
 };
 
 router.get("/agent/:agentId", (req: Request, res: Response, next: NextFunction) =>

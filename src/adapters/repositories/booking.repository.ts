@@ -1,97 +1,97 @@
 import { FilterQuery } from "mongoose";
-import { Iagent } from "../../domain/entities/agent/agent";
-import { Booking } from "../../domain/entities/booking/booking";
-import { Packages } from "../../domain/entities/package/package";
-import { Iuser } from "../../domain/entities/user/user";
-import bookingModel from "../database/models/booking.model";
-import { CustomError } from "../../domain/errors/customError";
-import Review from "../../domain/entities/review/review";
+import Review from "../../domain/entities/model/review.interface";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import IBooking from "../../domain/entities/model/booking.intrface";
+import bookingModel from "../database/models/booking.model";
+import IUser from "../../domain/entities/model/user.interface";
+import IPackage from "../../domain/entities/model/package.interface";
+import IAgent from "../../domain/entities/model/agent.interface";
+import CustomError from "../../domain/errors/customError";
 
-export class BookingRepository {
-  async createBooking(booking: Booking): Promise<Booking | null> {
+export default class BookingRepository {
+  async createBooking(booking: IBooking): Promise<IBooking | null> {
     const createdBooking = await bookingModel.create(booking);
-    const bookingData = createdBooking.toObject() as unknown as Booking;
+    const bookingData = createdBooking.toObject() as unknown as IBooking;
     return bookingData;
   }
-  async getBooking(bookingId: string): Promise<Booking | null> {
+  async getBooking(bookingId: string): Promise<IBooking | null> {
     try {
       const booking = await bookingModel
         .findOne({ _id: bookingId })
-        .populate<{ user_id: Iuser }>("user_id")
-        .populate<{ package_id: Packages }>("package_id")
+        .populate<{ user_id: IUser }>("user_id")
+        .populate<{ package_id: IPackage }>("package_id")
         .exec(); // Ensure proper promise handling
 
-      return booking as Booking | null;
+      return booking as IBooking | null;
     } catch (error) {
       console.error("Error fetching booking:", error);
       return null;
     }
   }
   async getAgentBooking(
-    query: FilterQuery<Booking>,
+    query: FilterQuery<IBooking>,
     page: number,
     limit: number
-  ): Promise<Booking[] | null> {
+  ): Promise<IBooking[] | null> {
     try {
       const booking = await bookingModel
         .find(query)
-        .populate<{ user_id: Iuser }>("user_id")
-        .populate<{ package_id: Packages }>("package_id")
+        .populate<{ user_id: IUser }>("user_id")
+        .populate<{ package_id: IPackage }>("package_id")
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 });
       return booking.map((booking) => {
-        const bookingData = booking.toObject() as unknown as Booking;
+        const bookingData = booking.toObject() as unknown as IBooking;
         return bookingData;
-      }) as Booking[] | null;
+      }) as IBooking[] | null;
     } catch (error) {
       console.error("Error fetching booking:", error);
       return null;
     }
   }
   async getAdminBookings(
-    query: FilterQuery<Booking>,
+    query: FilterQuery<IBooking>,
     page: number,
     limit: number
-  ): Promise<Booking[] | null> {
+  ): Promise<IBooking[] | null> {
     try {
       const bookings = await bookingModel
         .find(query)
-        .populate<{ user_id: Iuser }>("user_id")
-        .populate<{ package_id: Packages }>("package_id")
-        .populate<{ travel_agent_id: Iagent }>("travel_agent_id")
+        .populate<{ user_id: IUser }>("user_id")
+        .populate<{ package_id: IPackage }>("package_id")
+        .populate<{ travel_agent_id: IAgent }>("travel_agent_id")
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 });
       return bookings.map((booking) => {
-        const bookingData = booking.toObject() as unknown as Booking;
+        const bookingData = booking.toObject() as unknown as IBooking;
         return bookingData;
-      }) as Booking[] | null;
+      }) as IBooking[] | null;
     } catch (error) {
       console.error("Error fetching booking:", error);
       return null;
     }
   }
-  async countDocument(query: FilterQuery<Booking>): Promise<number> {
+  async countDocument(query: FilterQuery<IBooking>): Promise<number> {
     return bookingModel.countDocuments(query);
   }
   async countDocumentAgent(agentId: string): Promise<number> {
     return bookingModel.countDocuments({ travel_agent_id: agentId });
   }
-  async getTravelHistory(userId: string): Promise<Booking[] | null> {
+  async getTravelHistory(userId: string): Promise<IBooking[] | null> {
     const booking = await bookingModel
       .find({ user_id: userId })
-      .populate<{ user_id: Iuser }>("user_id")
-      .populate<{ package_id: Packages }>("package_id")
-      .populate<{ travel_agent_id: Iagent }>("travel_agent_id")
+      .populate<{ user_id: IUser }>("user_id")
+      .populate<{ package_id: IPackage }>("package_id")
+      .populate<{ travel_agent_id: IAgent }>("travel_agent_id")
       .sort({ createdAt: -1 });
-    return booking as Booking[] | [];
+    return booking as IBooking[] | [];
   }
   async cancelBooking(
     bookingId: string,
     cancellation_reason: string
-  ): Promise<Booking | null> {
+  ): Promise<IBooking | null> {
     try {
       const booking = await bookingModel.findOneAndUpdate(
         { _id: bookingId },
@@ -105,7 +105,7 @@ export class BookingRepository {
         },
         { new: true }
       );
-      return booking as Booking | null;
+      return booking as IBooking | null;
     } catch (error) {
       throw error;
     }
@@ -114,7 +114,7 @@ export class BookingRepository {
     bookingId: string,
     status: string,
     cancellation_reason: string
-  ): Promise<Booking | null> {
+  ): Promise<IBooking | null> {
     try {
       const booking = await bookingModel.findOneAndUpdate(
         { _id: bookingId },
@@ -124,7 +124,7 @@ export class BookingRepository {
       if (!booking) {
         throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
-      return booking as unknown as Booking | null;
+      return booking as unknown as IBooking | null;
     } catch (error) {
       throw error;
     }
@@ -132,7 +132,7 @@ export class BookingRepository {
   async changeTravelStatus(
     bookingId: string,
     travel_status: string
-  ): Promise<Booking | null> {
+  ): Promise<IBooking | null> {
     try {
       const booking = await bookingModel.findOneAndUpdate(
         { _id: bookingId },
@@ -142,23 +142,23 @@ export class BookingRepository {
       if (!booking) {
         throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
-      return booking as unknown as Booking | null;
+      return booking as unknown as IBooking | null;
     } catch (error) {
       throw error;
     }
   }
-  async getCompletedTravel(userId: string): Promise<Booking[] | null> {
+  async getCompletedTravel(userId: string): Promise<IBooking[] | null> {
     const booking = await bookingModel
       .find({ user_id: userId, travel_status: "completed" })
-      .populate<{ package_id: Packages }>("package_id")
+      .populate<{ package_id: IPackage }>("package_id")
       .populate<{ review_id: Review }>("review_id")
       .sort({ createdAt: -1 });
-    return booking as Booking[] | [];
+    return booking as IBooking[] | [];
   }
   async addReview(
     bookingId: string,
     reviewId: string | undefined
-  ): Promise<Booking | null> {
+  ): Promise<IBooking | null> {
     try {
       const booking = await bookingModel.findOneAndUpdate(
         { _id: bookingId },
@@ -170,15 +170,15 @@ export class BookingRepository {
       }
       const populatedBooking = await bookingModel
         .findById(booking._id)
-        .populate<{ package_id: Packages }>("package_id")
+        .populate<{ package_id: IPackage }>("package_id")
         .populate<{ review_id: Review }>("review_id");
 
-      return populatedBooking as unknown as Booking | null;
+      return populatedBooking as unknown as IBooking | null;
     } catch (error) {
       throw error;
     }
   }
-  async deleteReview(bookingId: string): Promise<Booking | null> {
+  async deleteReview(bookingId: string): Promise<IBooking | null> {
     try {
       const booking = await bookingModel.findOneAndUpdate(
         { _id: bookingId },
@@ -190,10 +190,10 @@ export class BookingRepository {
       }
       const populatedBooking = await bookingModel
         .findById(booking._id)
-        .populate<{ package_id: Packages }>("package_id")
+        .populate<{ package_id: IPackage }>("package_id")
         .populate<{ review_id: Review }>("review_id");
 
-      return populatedBooking as unknown as Booking | null;
+      return populatedBooking as unknown as IBooking | null;
     } catch (error) {
       throw error;
     }
@@ -332,7 +332,7 @@ export class BookingRepository {
       throw error;
     }
   }
-  async getNewBooking(agentId: string): Promise<Booking[] | null> {
+  async getNewBooking(agentId: string): Promise<IBooking[] | null> {
     try {
       const booking = await bookingModel
         .find({
@@ -342,7 +342,7 @@ export class BookingRepository {
         })
         .sort({ createdAt: -1 })
         .limit(5).populate('user_id');
-      return booking as unknown as Booking[] | null;
+      return booking as unknown as IBooking[] | null;
     } catch (error) {
       throw error;
     }

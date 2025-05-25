@@ -1,40 +1,39 @@
 import { NextFunction, Request, Response } from "express";
-import { AdminUseCase } from "../../application/usecases/admin";
-import { Iadmin } from "../../domain/entities/admin/admin";
+import { IAdminControllerDependencies } from "../../domain/entities/depencies/admindependencies.interface";
+import IAdmin from "../../domain/entities/model/admin.interface";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import IAdminController from "../../domain/entities/controller/admincontroller.interface";
+import IAdminUseCase from "../../domain/entities/usecase/adminusecase.interface";
 
-interface Dependencies {
-  useCase: {
-    AdminUseCase: AdminUseCase;
-  };
-}
+
 
 export const isString = (value: unknown): value is string =>
   typeof value === "string";
 
-export class adminController {
-  private _AdminUseCase: AdminUseCase;
-  constructor(dependencies: Dependencies) {
-    this._AdminUseCase = dependencies.useCase.AdminUseCase;
+export default class adminController implements IAdminController {
+  private _AdminUseCase: IAdminUseCase;
+  constructor(dependencies: IAdminControllerDependencies) {
+    this._AdminUseCase = dependencies.AdminUseCase;
   }
 
-  async loginAdmin(req: Request, res: Response, next: NextFunction) {
+  async loginAdmin(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const { email, password } = req.body as Iadmin;
+      const { email, password } = req.body as IAdmin;
       const { admin, accessToken, refreshToken } =
         await this._AdminUseCase.loginAdmin(email, password);
-      return res.status(HttpStatusCode.OK).json({
+      res.status(HttpStatusCode.OK).json({
         success: true,
         message: "Admin Logged In",
         admin,
         accessToken,
         refreshToken,
       });
+      return
     } catch (error) {
       return next(error);
     }
   }
-  async RefreshAccessToken(req: Request, res: Response) {
+  async RefreshAccessToken(req: Request, res: Response): Promise<Response | void> {
     try {
       const accessToken = await this._AdminUseCase.refreshAccessToken(
         req.body.refreshToken
@@ -48,7 +47,7 @@ export class adminController {
       return res.status(HttpStatusCode.BAD_REQUEST).json({ error: err.message });
     }
   }
-  async getAllUsers(req: Request, res: Response, next: NextFunction) {
+  async getAllUsers(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
@@ -56,12 +55,12 @@ export class adminController {
         ? parseInt(req.query.limit, 10)
         : 8;
       const filter = isString(req.query.filter) ? req.query.filter : "";
-      const { users, totalItems, totalPages, currentPage } =
+      const { data, totalItems, totalPages, currentPage } =
         await this._AdminUseCase.getAllUsers(search, page, limit, filter);
       return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "Fetched All Users",
-        filterData: users,
+        filterData: data,
         totalItems,
         totalPages,
         currentPage,
@@ -70,7 +69,7 @@ export class adminController {
       return next(error);
     }
   }
-  async BlockUser(req: Request, res: Response, next: NextFunction) {
+  async BlockUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id, is_block } = req.body;
       const user = await this._AdminUseCase.changeUserStatus(id, is_block);
@@ -83,7 +82,7 @@ export class adminController {
       return next(error);
     }
   }
-  async getAllAgencies(req: Request, res: Response, next: NextFunction) {
+  async getAllAgencies(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
@@ -91,12 +90,12 @@ export class adminController {
         ? parseInt(req.query.limit, 10)
         : 8;
       const filter = isString(req.query.filter) ? req.query.filter : "";
-      const { agencies, totalItems, totalPages, currentPage } =
+      const { data, totalItems, totalPages, currentPage } =
         await this._AdminUseCase.getAllAgencies(search, page, limit, filter);
       return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "Fetch all agencies",
-        filterData: agencies,
+        filterData: data,
         totalItems,
         totalPages,
         currentPage,
@@ -105,7 +104,7 @@ export class adminController {
       return next(error);
     }
   }
-  async BlockAgent(req: Request, res: Response, next: NextFunction) {
+  async BlockAgent(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id, is_block } = req.body;
       const agent = await this._AdminUseCase.changeAgentStatus(id, is_block);
@@ -118,7 +117,7 @@ export class adminController {
       return next(error);
     }
   }
-  async getAgent(req: Request, res: Response, next: NextFunction) {
+  async getAgent(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const id = req.params.agentid;
       const agent = await this._AdminUseCase.getAgent(id);
@@ -129,7 +128,7 @@ export class adminController {
       return next(error);
     }
   }
-  async verifyAgentByAdmin(req: Request, res: Response, next: NextFunction) {
+  async verifyAgentByAdmin(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id, admin_verified } = req.body;
       const agent = await this._AdminUseCase.adminVerifyAgent(
@@ -138,20 +137,19 @@ export class adminController {
       );
       return res.status(HttpStatusCode.OK).json({
         success: true,
-        message: `${
-          agent.admin_verified == "accept"
-            ? "Agency Aceepted"
-            : "Agency Rejected"
-        }`,
+        message: `${agent.admin_verified == "accept"
+          ? "Agency Aceepted"
+          : "Agency Rejected"
+          }`,
         agent,
       });
     } catch (error) {
       return next(error);
     }
   }
-  async getDashboard(req: Request, res: Response, next: NextFunction) {
+  async getDashboard(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const { users, agent, packages, bookings,revenue, unconfirmedagency } =
+      const { users, agent, packages, bookings, revenue, unconfirmedagency } =
         await this._AdminUseCase.getDashboardData();
       return res
         .status(HttpStatusCode.OK)
@@ -169,7 +167,7 @@ export class adminController {
       return next(error);
     }
   }
-  async getAllAgents(req: Request, res: Response, next: NextFunction) {
+  async getAllAgents(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const agents = await this._AdminUseCase.getAllAgents();
       return res
@@ -179,16 +177,16 @@ export class adminController {
       return next(error);
     }
   }
-  async getAgentBookingData(req: Request, res: Response, next: NextFunction) {
+  async getAgentBookingData(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const {agentId}=req.params
-      const bookingData=await this._AdminUseCase.getAgentBookingData(agentId);
-      return res.status(HttpStatusCode.OK).json({success:true,message:"Fetched agent booking data",bookingData});
+      const { agentId } = req.params
+      const bookingData = await this._AdminUseCase.getAgentBookingData(agentId);
+      return res.status(HttpStatusCode.OK).json({ success: true, message: "Fetched agent booking data", bookingData });
     } catch (error) {
       next(error);
     }
   }
-  async getBarChartData(req: Request, res: Response, next: NextFunction) {
+  async getBarChartData(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const barChartData = await this._AdminUseCase.getBarChartData();
       return res

@@ -1,17 +1,17 @@
 import { FilterQuery, Types } from "mongoose";
-import { Coupon } from "../../domain/entities/coupon/coupon";
-import { CustomError } from "../../domain/errors/customError";
+import ICoupon from "../../domain/entities/model/coupon.interface";
+import CustomError from "../../domain/errors/customError";
 import couponModel from "../database/models/coupon.model";
 import HttpStatusCode from "../../domain/enum/httpstatus";
 
-export class CouponRepository {
-  async createCoupon(coupon: Coupon): Promise<Coupon> {
-    const couponData: Coupon = (
+export default class CouponRepository {
+  async createCoupon(coupon: ICoupon): Promise<ICoupon> {
+    const couponData: ICoupon = (
       await couponModel.create(coupon)
-    ).toObject() as unknown as Coupon;
+    ).toObject() as unknown as ICoupon;
     return couponData;
   }
-  async getAllCoupons(query: FilterQuery<Coupon>,page: number,limit: number,filterData:object): Promise<Coupon[] | null> {
+  async getAllCoupons(query: FilterQuery<ICoupon>,page: number,limit: number,filterData:object): Promise<ICoupon[] | null> {
     try {
       const completedQuery={...query,...filterData}
       const coupons = await couponModel.find(completedQuery).skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
@@ -23,20 +23,20 @@ export class CouponRepository {
       throw new CustomError("Failed to get coupons", HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
   }
-  async couponCount(query: FilterQuery<Coupon>,filterData:object): Promise<number> {
+  async couponCount(query: FilterQuery<ICoupon>,filterData:object): Promise<number> {
     const completedQuery={...query,...filterData}
     return couponModel.countDocuments(completedQuery);
   }
-  async getCouponByCode(coupon_code: string): Promise<Coupon | null> {
-    const coupon: Coupon | null = await couponModel.findOne({ coupon_code });
+  async getCouponByCode(coupon_code: string): Promise<ICoupon | null> {
+    const coupon: ICoupon | null = await couponModel.findOne({ coupon_code });
     return coupon;
   }
-  async getCouponById(coupon_id: string): Promise<Coupon | null> {
-    const coupon: Coupon | null = await couponModel.findById(coupon_id);
+  async getCouponById(coupon_id: string): Promise<ICoupon | null> {
+    const coupon: ICoupon | null = await couponModel.findById(coupon_id);
     return coupon;
   }
-  async editCoupon(coupon_id: string, coupon: Coupon): Promise<Coupon | null> {
-    const updatedCoupon: Coupon | null = await couponModel.findByIdAndUpdate(
+  async editCoupon(coupon_id: string, coupon: ICoupon): Promise<ICoupon | null> {
+    const updatedCoupon: ICoupon | null = await couponModel.findByIdAndUpdate(
       coupon_id,
       coupon,
       { new: true }
@@ -49,9 +49,9 @@ export class CouponRepository {
   async blockCoupon(
     coupon_id: string,
     is_active: boolean
-  ): Promise<Coupon | null> {
+  ): Promise<ICoupon | null> {
     try {
-      const updatedCoupon: Coupon | null = await couponModel.findByIdAndUpdate(
+      const updatedCoupon: ICoupon | null = await couponModel.findByIdAndUpdate(
         coupon_id,
         { is_active },
         { new: true }
@@ -65,18 +65,18 @@ export class CouponRepository {
       throw new CustomError("Failed to update coupon", HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
   }
-  async getUnblockedCoupons(): Promise<Coupon[] | null> {
+  async getUnblockedCoupons(): Promise<ICoupon[] | null> {
     try {
-      const coupons: Coupon[] = await couponModel.find({ is_active: true });  
+      const coupons: ICoupon[] = await couponModel.find({ is_active: true });  
       return coupons;
     } catch (error) {
       throw error;
     }
   }
 
-  async adduserCoupon(coupon_id: string, user_id: string): Promise<Coupon | null> {
+  async adduserCoupon(coupon_id: string, user_id: string): Promise<ICoupon | null> {
     try {
-      const updatedCoupon: Coupon | null = await couponModel.findByIdAndUpdate(
+      const updatedCoupon: ICoupon | null = await couponModel.findByIdAndUpdate(
         coupon_id,
         { $push: { used_by: new Types.ObjectId(user_id) } },
         { new: true }

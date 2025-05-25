@@ -1,15 +1,15 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { categoryController } from "../../../../adapters/controllers/category.controller";
 import multer from "multer";
-import Depencies from "../../../dependancies/depencies";
 import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
 import { category_schema } from "../../../../domain/validator/admin-validator";
+import CategoryDependencies from "../../../dependancies/category.dependencies";
+import CategoryController from "../../../../adapters/controllers/category.controller";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const controller = {
-  category: new categoryController(Depencies),
+  category: new CategoryController(CategoryDependencies),
 };
 router.get("/", (req: Request, res: Response, next: NextFunction) =>
   controller.category.getAllCategories(req, res, next)

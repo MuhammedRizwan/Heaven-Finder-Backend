@@ -1,42 +1,40 @@
 import { NextFunction, Request, Response } from "express";
-import { CouponUseCase } from "../../application/usecases/coupon/intex";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import ICouponController from "../../domain/entities/controller/couponcontroller.interface";
+import ICouponUseCase from "../../domain/entities/usecase/couponusecase.interface";
+import { ICouponControllerDependencies } from "../../domain/entities/depencies/coupondependencies.interface";
 
-interface Dependencies {
-  useCase: {
-    CouponUseCase: CouponUseCase;
-  };
-}
+
 const isString = (value: unknown): value is string => typeof value === "string";
-export class CouponController {
-  private _couponuseCase: CouponUseCase;
+export default class CouponController implements ICouponController {
+  private _couponuseCase: ICouponUseCase;
 
-  constructor(dependencies: Dependencies) {
-    this._couponuseCase = dependencies.useCase.CouponUseCase;
+  constructor(dependencies: ICouponControllerDependencies) {
+    this._couponuseCase = dependencies.CouponUseCase;
   }
-  async createCoupon(req: Request, res: Response, next: NextFunction) {
+  async createCoupon(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const coupon = req.body;
       const couponData = await this._couponuseCase.createCoupon(coupon);
       return res
         .status(HttpStatusCode.CREATED)
-        .json({ success:true, message: "Coupon Created", couponData });
+        .json({ success: true, message: "Coupon Created", couponData });
     } catch (error) {
       next(error);
     }
   }
-  async getAllCoupons(req: Request, res: Response, next: NextFunction) {
+  async getAllCoupons(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 8) : 1;
       const limit = isString(req.query.limit)
         ? parseInt(req.query.limit, 8)
         : 3;
-        const filter=isString(req.query.filter) ? req.query.filter : "";
+      const filter = isString(req.query.filter) ? req.query.filter : "";
       const { coupons, totalItems, totalPages, currentPage } =
-        await this._couponuseCase.getAllCoupons(search, page, limit,filter);
+        await this._couponuseCase.getAllCoupons(search, page, limit, filter);
       return res.status(HttpStatusCode.OK).json({
-        success:true,
+        success: true,
         message: "All coupons",
         filterData: coupons,
         totalItems,
@@ -47,7 +45,7 @@ export class CouponController {
       next(error);
     }
   }
-  async editCoupon(req: Request, res: Response, next: NextFunction) {
+  async editCoupon(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const coupon = req.body;
       const couponId = req.params.couponId;
@@ -57,37 +55,37 @@ export class CouponController {
       );
       return res
         .status(HttpStatusCode.OK)
-        .json({ success:true, message: "Coupon Edited", couponData });
+        .json({ success: true, message: "Coupon Edited", couponData });
     } catch (error) {
       next(error);
     }
   }
-  async blockCoupon(req: Request, res: Response, next: NextFunction) {
+  async blockCoupon(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const {couponId} = req.params;
+      const { couponId } = req.params;
       const { is_active } = req.body;
       const coupons = await this._couponuseCase.blockCoupon(couponId, is_active);
       return res
         .status(HttpStatusCode.OK)
-        .json({ success:true, message: "Coupon Blocked", coupons });
+        .json({ success: true, message: "Coupon Blocked", coupons });
     } catch (error) {
       next(error);
     }
   }
-  async getUnblockedCoupons(req: Request, res: Response, next: NextFunction) {
+  async getUnblockedCoupons(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const coupons = await this._couponuseCase.getUnblockedCoupons();
       return res
         .status(HttpStatusCode.OK)
-        .json({ success:true, message: "Unblocked coupons", coupons });
+        .json({ success: true, message: "Unblocked coupons", coupons });
     } catch (error) {
       next(error);
     }
   }
-  async getUsedCoupons(req: Request, res: Response, next: NextFunction) {
+  async getUsedCoupons(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const couponId = req.params.couponId;
-      const {userId,totalPrice} = req.body;
+      const { userId, totalPrice } = req.body;
       const discountAmount = await this._couponuseCase.getUsedCoupons(
         couponId,
         userId,
@@ -95,7 +93,7 @@ export class CouponController {
       );
       return res
         .status(HttpStatusCode.OK)
-        .json({ success:true, message: "coupon validated", discountAmount });
+        .json({ success: true, message: "coupon validated", discountAmount });
     } catch (error) {
       next(error);
     }

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import configkeys from "../../config";
+import configkeys from "../../domain/config/dotenv.config";
 
 export const connection =() => {
   mongoose.connect(configkeys.MONGODB_URL);

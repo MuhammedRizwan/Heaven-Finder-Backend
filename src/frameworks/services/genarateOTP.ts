@@ -1,4 +1,4 @@
-export class GenerateOtp {
+export default class GenerateOtp {
     private otpLength: number;
   
     constructor(otpLength: number = 4) {

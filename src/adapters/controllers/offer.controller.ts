@@ -1,21 +1,18 @@
 import { NextFunction, Request, Response } from "express";
-import { OfferUseCase } from "../../application/usecases/offer";
 import { isString } from "./admin.controller";
-import { CustomError } from "../../domain/errors/customError";
+import CustomError  from "../../domain/errors/customError";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import IOfferUseCase from "../../domain/entities/usecase/offerusecase.interface";
+import { IOfferControllerDependencies } from "../../domain/entities/depencies/offerdependencies.interface";
+import { IOfferController } from "../../domain/entities/controller/offercontroller.interface";
 
-interface Dependencies {
-  useCase: {
-    OfferUseCase: OfferUseCase;
-  };
-}
 
-export class OfferController {
-  private _OfferUseCase: OfferUseCase;
-  constructor(dependencies: Dependencies) {
-    this._OfferUseCase = dependencies.useCase.OfferUseCase;
+export default class OfferController implements IOfferController {
+  private _OfferUseCase: IOfferUseCase;
+  constructor(dependencies: IOfferControllerDependencies) {
+    this._OfferUseCase = dependencies.OfferUseCase;
   }
-  async getAllOffers(req: Request, res: Response, next: NextFunction) {
+  async getAllOffers(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { agentId } = req.params;
       const search = isString(req.query.search) ? req.query.search : "";
@@ -44,7 +41,7 @@ export class OfferController {
       next(error);
     }
   }
-  async createOffer(req: Request, res: Response, next: NextFunction) {
+  async createOffer(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const offer = await this._OfferUseCase.createOffer(req.body, req.file);
       res
@@ -54,7 +51,7 @@ export class OfferController {
       next(error);
     }
   }
-  async getOffer(req: Request, res: Response, next: NextFunction) {
+  async getOffer(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { offerId } = req.params;
       const offer = await this._OfferUseCase.getOffer(offerId);
@@ -65,7 +62,7 @@ export class OfferController {
       next(error);
     }
   }
-  async updateOffer(req: Request, res: Response, next: NextFunction) {
+  async updateOffer(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { offerId } = req.params;
       const offer = await this._OfferUseCase.updateOffer(
@@ -80,7 +77,7 @@ export class OfferController {
       next(error);
     }
   }
-  async blockNUnblockOffer(req: Request, res: Response, next: NextFunction) {
+  async blockNUnblockOffer(req: Request, res: Response, next: NextFunction) : Promise<Response | void>{
     try {
       const { offerId } = req.params;
       const { is_active } = req.body;
@@ -95,7 +92,7 @@ export class OfferController {
       next(error);
     }
   }
-  async addofferPackage(req: Request, res: Response, next: NextFunction) {
+  async addofferPackage(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { agentId } = req.params;
       const packages = await this._OfferUseCase.addofferPackage(agentId);
@@ -110,7 +107,7 @@ export class OfferController {
       next(error);
     }
   }
-  async execute(){
+  async execute(): Promise<Response | void>{
     try {
       await this._OfferUseCase.executeOffers()
     } catch (error) {

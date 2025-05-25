@@ -1,29 +1,27 @@
 import { NextFunction, Request, Response } from "express";
-import { packageUseCase } from "../../application/usecases/package";
-import { Packages } from "../../domain/entities/package/package";
+import { IPackageControllerDependencies } from "../../domain/entities/depencies/packagedependencies.interface";
 import { isString } from "./admin.controller";
+import IPackage from "../../domain/entities/model/package.interface";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import IPackageUseCase from "../../domain/entities/usecase/packageusecase.interface";
+import IPackageController from "../../domain/entities/controller/packagecontroller.interface";
 
-interface Dependencies {
-  useCase: {
-    packageUseCase: packageUseCase;
-  };
-}
-export interface filterData {
-  category_id: string;
-  price_range: string;
-  days: string;
-}
-export class PackageController {
-  private _packageUseCase: packageUseCase;
-  constructor(dependencies: Dependencies) {
-    this._packageUseCase = dependencies.useCase.packageUseCase;
+// export interface filterData {
+//   category_id: string;
+//   price_range: string;
+//   days: string;
+// }
+
+export default class PackageController implements IPackageController {
+  private _packageUseCase: IPackageUseCase;
+  constructor(dependencies: IPackageControllerDependencies) {
+    this._packageUseCase = dependencies.PackageUseCase;
   }
-  async createPackage(req: Request, res: Response, next: NextFunction) {
+  async createPackage(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { original_price, agentId } = req.body;
 
-      const package_data: Packages = {
+      const package_data: IPackage = {
         ...req.body,
         travel_agent_id: agentId,
         offer_price: original_price,
@@ -42,7 +40,7 @@ export class PackageController {
       next(error);
     }
   }
-  async getAllPackages(req: Request, res: Response, next: NextFunction) {
+  async getAllPackages(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
@@ -54,8 +52,8 @@ export class PackageController {
         : "";
       const days = isString(req.query.days) ? req.query.days : "";
       const startRange = isString(req.query.startRange)
-          ? req.query.startRange
-          : "",
+        ? req.query.startRange
+        : "",
         endRange = isString(req.query.endRange) ? req.query.endRange : "";
       const { packages, totalItems, totalPages, currentPage } =
         await this._packageUseCase.getAllPackages(
@@ -79,7 +77,7 @@ export class PackageController {
       next(error);
     }
   }
-  async editPackage(req: Request, res: Response, next: NextFunction) {
+  async editPackage(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { packageId } = req.params;
       const result = await this._packageUseCase.editPackage(
@@ -96,7 +94,7 @@ export class PackageController {
       next(error);
     }
   }
-  async blockNUnblockPackage(req: Request, res: Response, next: NextFunction) {
+  async blockNUnblockPackage(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { is_block } = req.body;
       const { packageId } = req.params;
@@ -113,7 +111,7 @@ export class PackageController {
       next(error);
     }
   }
-  async getPackageById(req: Request, res: Response, next: NextFunction) {
+  async getPackageById(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { packageId } = req.params;
       const packageData = await this._packageUseCase.getPackage(packageId);
@@ -126,7 +124,7 @@ export class PackageController {
       next(error);
     }
   }
-  async getAgentPackages(req: Request, res: Response, next: NextFunction) {
+  async getAgentPackages(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { agentId } = req.params;
       const search = isString(req.query.search) ? req.query.search : "";
@@ -153,7 +151,7 @@ export class PackageController {
       next(error);
     }
   }
-  async getSimilarPackages(req: Request, res: Response, next: NextFunction) {
+  async getSimilarPackages(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { packageId } = req.params;
       const packageList = await this._packageUseCase.getSimilarPackages(
@@ -168,7 +166,7 @@ export class PackageController {
       next(error);
     }
   }
-  async updatePackageImage(req: Request, res: Response, next: NextFunction) {
+  async updatePackageImage(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { oldPublicId } = req.body;
       const image = req.file;
@@ -185,7 +183,7 @@ export class PackageController {
       next(error);
     }
   }
-  async deletePackageImage(req: Request, res: Response, next: NextFunction) {
+  async deletePackageImage(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { publicId } = req.body;
       await this._packageUseCase.deletePackageImage(publicId);

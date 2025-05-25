@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { walletController } from "../../../../adapters/controllers/wallet.controller";
-import Depencies from "../../../dependancies/depencies";
+import walletController from "../../../../adapters/controllers/wallet.controller";
+import WalletDependencies from "../../../dependancies/wallet.dependencies";
 
 const router = Router();
 
 const controller = {
-  wallet: new walletController(Depencies),
+  wallet: new walletController(WalletDependencies),
 };
 
 router.get("/:userId", (req: Request, res: Response, next: NextFunction) =>

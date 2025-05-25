@@ -11,17 +11,17 @@ import notificationRouter from "./notification.router";
 import multer from "multer";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
 import { userBlocked } from "../../../../adapters/middleware/block.middleware";
-import { userController } from "../../../../adapters/controllers/user.controller";
+import userController  from "../../../../adapters/controllers/user.controller";
 import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
-import Depencies from "../../../dependancies/depencies";
 import { emailValidationSchema, password_reset_validate, password_validate, passwordValidationSchema, profile_schema, userLoginSchema, userSignupSchema } from "../../../../domain/validator/user-validator";
+import UserDependencies from "../../../dependancies/user.dependencies";
 
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const controller = {
-  user: new userController(Depencies),
+  user: new userController(UserDependencies),
 };
 
 router.post(

@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response, Router } from "express";
 import multer from "multer";
-import { PackageController } from "../../../../adapters/controllers/package.controller";
-import Depencies from "../../../dependancies/depencies";
+import PackageController  from "../../../../adapters/controllers/package.controller";
 import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
 import { package_schema } from "../../../../domain/validator/agent-validator";
+import PackageDependencies from "../../../dependancies/package.dependencies";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 const controller = {
-  package: new PackageController(Depencies),
+  package: new PackageController(PackageDependencies),
 };
 
 router.get("/", (req: Request, res: Response, next: NextFunction) =>

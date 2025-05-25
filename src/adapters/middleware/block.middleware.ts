@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from "express";
-import { UserRepository } from "../repositories/user.repositories";
-import { AgentRepository } from "../repositories/agent.repository";
-import { CustomError } from "../../domain/errors/customError";
+import UserRepository from "../repositories/user.repositories";
+import AgentRepository from "../repositories/agent.repository";
+import CustomError from "../../domain/errors/customError";
 import HttpStatusCode from "../../domain/enum/httpstatus";
 
 const userRepository = new UserRepository();
 const agentRepository = new AgentRepository();
-export const userBlocked = async (req: Request, res: Response, next: NextFunction ) => {
+export const userBlocked = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (req.user) {  
+    if (req.user) {
       const user = await userRepository.getUser(req.user.userId);
       if (!user) {
         return res.status(HttpStatusCode.NOT_FOUND).json({ message: "User not found" });
