@@ -63,17 +63,20 @@ export class WalletRepository {
       transactionType: "credit",
       reason,
     };
-    const newWallet = await walletModel.updateOne(
+    const updatedWallet = await walletModel.findOneAndUpdate(
       { wallet_user: adminId },
       {
         $inc: { walletBalance: amount },
-        $push: { transaction: newTransaction },
+        $push: {
+          transaction: newTransaction,
+        },
       },
       {
-        new: true,
+        returnDocument: "after",
+        lean: true,
       }
     );
-    return newWallet as unknown as Wallet;
+    return updatedWallet as unknown as Wallet;
   }
   async debitWallet(
     bookingId: string,

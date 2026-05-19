@@ -39,24 +39,27 @@ export class AgentRepository {
   }
   async getAllAgenciesData(
     query: FilterQuery<Iagent>,
-    page: number,
-    limit: number,
+    page = 1,
+    limit = 10,
     filterData: object
-  ): Promise<Iagent[] | null> {
-    const completedQuery = { ...query, ...filterData };
+  ): Promise<Iagent[]> {
+    const completedQuery = {
+      ...query,
+      ...filterData,
+    };
+
     const agencies = await agentModel
       .find(completedQuery)
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .lean()
-      .sort({ createdAt: -1 });
-    if (agencies) {
-      return agencies.map((agency) => ({
-        ...agency,
-        _id: agency._id as string,
-      }));
-    }
-    return null;
+      .lean();
+
+    return agencies.map((agency) => ({
+      ...agency,
+      _id: agency._id.toString(),
+      refreshToken: agency.refreshToken ?? undefined,
+    }));
   }
   async changeAgentStatus(
     id: ObjectId,
@@ -133,7 +136,7 @@ export class AgentRepository {
   }
   async unconfirmedagent(): Promise<Iagent[] | null> {
     try {
-      const agent = await agentModel.find({ admin_verified: "pending",is_block:false },{_id:1,agency_name:1,profile_picture:1,createdAt:1}).limit(5);
+      const agent = await agentModel.find({ admin_verified: "pending", is_block: false }, { _id: 1, agency_name: 1, profile_picture: 1, createdAt: 1 }).limit(5);
       return agent as unknown as Iagent[]
     } catch (error) {
       throw error;
@@ -141,7 +144,7 @@ export class AgentRepository {
   }
   async getAllagent(): Promise<Iagent[] | null> {
     try {
-      const agent = await agentModel.find({is_block:false},{_id:1,agency_name:1})
+      const agent = await agentModel.find({ is_block: false }, { _id: 1, agency_name: 1 })
       return agent as unknown as Iagent[]
     } catch (error) {
       throw error;
